@@ -23,7 +23,14 @@ module.exports = function(clientConfig, actions) {
             config: {
                 handler: (request, reply) => {
                     console.log(request.payload);
-                    this.receiveMessage(request.payload.message, request.payload.context);
+                    const originalContext = request.payload.context;
+                    const replyMessage = (msg, customContext) => {
+                        const fullContext = Object.assign({
+                            reply: true
+                        }, customContext || {}, originalContext);
+                        Connection.replyMessage(clientConfig, msg, fullContext);
+                    };
+                    this.receiveMessage(request.payload.action, request.payload.message, originalContext, replyMessage);
                 }
             }
         }
