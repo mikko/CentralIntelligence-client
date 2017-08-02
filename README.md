@@ -80,4 +80,48 @@ client.setReceiver(messageReceiver);
 
 ## Creating your own input client
 
-TODO
+Install this client helper
+
+`npm install --save mikko/CentralIntelligence-client`
+
+
+Implement the input client
+
+```
+const Client = require('ci-client');
+
+const readline = require('readline'); // As an example we use command line for input
+
+const config = {
+    name: 'cli-input',
+    serverHost: 'localhost',
+    serverPort: 3000,
+    myHost: 'localhost',
+    myPort: 3002
+};
+
+const client = new Client(config);
+
+const ask = () => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question('What would you like to know? ', answer => {
+        const customContext = { messageSent: new Date().toISOString() };
+        client.sendMessage(answer, customContext);     // Use the helper library to send messages
+        rl.close();
+        ask();
+    });
+};
+
+
+setTimeout(() => ask(), 1000);
+
+const messageReceiver = (message, context) => {
+    console.log(message);
+    if (context.messageSent !== undefined) { // You can use context for saving metadata
+      console.log('This is an answer to previous message sent on', context.messageSent);
+    }
+};
+
+client.setReceiver(messageReceiver);
+
+```
