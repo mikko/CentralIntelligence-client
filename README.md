@@ -103,17 +103,21 @@ const config = {
 const client = new Client(config);
 
 const ask = () => {
+    // Irrelevant example stuff
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    
     rl.question('What would you like to know? ', answer => {
+        
+        // Relevant part here
         const customContext = { messageSent: new Date().toISOString() };
         client.sendMessage(answer, customContext);     // Use the helper library to send messages
+        
         rl.close();
         ask();
     });
 };
 
-
-setTimeout(() => ask(), 1000);
+setTimeout(() => ask(), 1000); // Timeout for avoiding the messy startup logging in console
 
 const messageReceiver = (message, context) => {
     console.log(message);
@@ -122,6 +126,7 @@ const messageReceiver = (message, context) => {
     }
 };
 
+// Register the receiver
 client.setReceiver(messageReceiver);
 
 ```
