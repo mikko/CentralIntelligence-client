@@ -33,6 +33,23 @@ module.exports = function(clientConfig, actions) {
                     this.receiveMessage(request.payload.action, request.payload.message, originalContext, replyMessage);
                 }
             }
+        },
+        {
+            method: 'POST',
+            path: `/command`,
+            config: {
+                handler: (request, reply) => {
+                    console.log(request.payload);
+                    const originalContext = request.payload.context;
+                    const replyMessage = (msg, customContext) => {
+                        const fullContext = Object.assign({
+                            reply: true
+                        }, customContext || {}, originalContext);
+                        Connection.replyMessage(clientConfig, msg, fullContext);
+                    };
+                    this.receiveCommand(request.payload.command, request.payload.parameters, originalContext, replyMessage);
+                }
+            }
         }
     ];
 
@@ -60,7 +77,17 @@ module.exports = function(clientConfig, actions) {
         Connection.sendMessage(clientConfig, msg, fullContext);
     };
 
+    this.sendCommand = (cmd, params, customContext) => {
+        const fullContext = Object.assign({
+            origin: clientConfig.name
+        }, customContext);
+        Connection.sendCommand(clientConfig, cmd, params, fullContext);
+    };
+
     this.receiveMessage = msg => console.log('No handler specified but message received', msg);
 
+    this.receiveCommand = cmd => console.log('No handler specified but command received', cmd);
+
     this.setReceiver = receiver => this.receiveMessage = receiver;
+    this.setCommandHandler = handler => this.receiveCommand = handler;
 };
