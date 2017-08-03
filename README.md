@@ -119,7 +119,8 @@ const ask = () => {
 
 setTimeout(() => ask(), 1000); // Timeout for avoiding the messy startup logging in console
 
-const messageReceiver = (message, context) => {
+// action not in use when received message is a reply to a message
+const messageReceiver = (action, message, context, reply) => {
     console.log(message);
     if (context.messageSent !== undefined) { // You can use context for saving metadata
       console.log('This is an answer to previous message sent on', context.messageSent);
