@@ -62,13 +62,25 @@ module.exports = function(clientConfig, actions) {
                 handler: (request, reply) => {
                     console.log(request.payload);
                     const originalContext = request.payload.context;
+
+                    const paramsString = request.payload.parameters;
+                    const paramsJSON = request.payload.JSONpayload;
+
+                    let params;
+
+                    if (paramsString !== undefined && paramsString !== '') {
+                        params = paramsString;
+                    } else if (paramsJSON !== undefined) {
+                        params = paramsJSON;
+                    }
+
                     const replyMessage = (msg, customContext) => {
                         const fullContext = Object.assign({
                             reply: true
                         }, customContext || {}, originalContext);
                         Connection.replyMessage(clientConfig, msg, fullContext);
                     };
-                    this.receiveCommand(request.payload.command, request.payload.parameters, originalContext, replyMessage);
+                    this.receiveCommand(request.payload.command, params, originalContext, replyMessage);
                     reply('Command received');
                 }
             }
@@ -103,6 +115,7 @@ module.exports = function(clientConfig, actions) {
         const fullContext = Object.assign({
             _origin: clientConfig.name
         }, customContext);
+
         Connection.sendCommand(clientConfig, cmd, params, fullContext);
     };
 
