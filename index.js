@@ -31,11 +31,15 @@ module.exports = function(clientConfig, actions) {
                     const replyMessage = (msg, customContext) => {
                         customContext = customContext || originalContext;
                         const user = this.getUser(Context.getUser(originalContext));
+                        const userProperties = this.getUserProperties(customContext);
+
                         const isPrivate = this.isPrivate(originalContext._private);
 
-                        const fullContext = Context.updateContext(user, isPrivate, true, customContext, actionName);
-
-                        Connection.replyMessage(clientConfig, msg, fullContext);
+                        const newContext = Context.createContext(customContext);
+                        Context.setUserData(user, userProperties, newContext);
+                        Context.setPrivate(isPrivate);
+                        Context.setReply(true, actionName, newContext);
+                        Connection.replyMessage(clientConfig, msg, newContext);
                     };
 
                     const prompt = (question, key, options) => {
@@ -106,9 +110,13 @@ module.exports = function(clientConfig, actions) {
 
     this.sendMessage = (msg, customContext) => {
         const userHash = this.getUser(customContext);
+        const userProperties = this.getUserProperties(customContext);
         const isPrivate = this.isPrivate(customContext);
-        const fullContext = Context.updateContext(userHash, isPrivate, false, customContext);
-        Connection.sendMessage(clientConfig, msg, fullContext);
+
+        const newContext = Context.createContext(customContext);
+        Context.setUserData(userHash, userProperties, newContext);
+        Context.setPrivate(isPrivate, newContext);
+        Connection.sendMessage(clientConfig, msg, newContext);
     };
 
     this.sendCommand = (cmd, params, customContext) => {
@@ -127,9 +135,11 @@ module.exports = function(clientConfig, actions) {
         'Call setUserParser');
     this.isPrivate = context => console.log('Public check not implemented in this client. ' +
         'Assuming all messages public. Please call setPrivateChatParser');
+    this.getUserProperties = context => () => ({});
 
     this.setReceiver = receiver => this.receiveMessage = receiver;
     this.setCommandHandler = handler => this.receiveCommand = handler;
     this.setUserParser = parser => this.getUser = parser;
+    this.setUserPropertiesParser = parser => this.getUserProperties = parser;
     this.setPrivateChatParser = isPrivate => this.isPrivate = isPrivate;
 };
