@@ -142,4 +142,9 @@ module.exports = function(clientConfig, actions) {
     this.setUserParser = parser => this.getUser = parser;
     this.setUserPropertiesParser = parser => this.getUserProperties = parser;
     this.setPrivateChatParser = isPrivate => this.isPrivate = isPrivate;
+
+    this.stop = () => {
+        console.log('Closing client server');
+        return server.stop().then(() => console.log('Client server closed'));
+    };
 };
